@@ -336,11 +336,9 @@ namespace WpfAnimatedGif
         private static FrameMetadata GetFrameMetadata(BitmapFrame frame)
         {
             var metadata = (BitmapMetadata)frame.Metadata;
-            var delay = TimeSpan.FromMilliseconds(100);
-            var metadataDelay = metadata.GetQueryOrDefault("/grctlext/Delay", 10);
-            if (metadataDelay != 0)
-                delay = TimeSpan.FromMilliseconds(metadataDelay * 10);
-            var disposalMethod = (FrameDisposalMethod)metadata.GetQueryOrDefault("/grctlext/Disposal", 0);
+            var metadataDelay = metadata.GetQueryOrDefault("/grctlext/Delay", 0);
+            var delay = TimeSpan.FromMilliseconds(metadataDelay <= 1 ? 100 : metadataDelay * 10);
+            var disposalMethod = (FrameDisposalMethod)(metadata.GetQueryOrDefault("/grctlext/Disposal", 0) % 0x03);
             var frameMetadata = new FrameMetadata
             {
                 Left = metadata.GetQueryOrDefault("/imgdesc/Left", 0),
