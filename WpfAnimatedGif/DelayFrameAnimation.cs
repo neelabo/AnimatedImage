@@ -155,10 +155,6 @@ namespace WpfAnimatedGif
 
             switch (metadata.DisposalMethod)
             {
-                case FrameDisposalMethod.None:
-                case FrameDisposalMethod.DoNotDispose:
-                    nextBaseFrameTask = frame;
-                    break;
                 case FrameDisposalMethod.RestoreBackground:
                     if (IsFullFrame(metadata, fullSize))
                     {
@@ -175,7 +171,8 @@ namespace WpfAnimatedGif
                     break;
 
                 default:
-                    throw new InvalidOperationException();
+                    nextBaseFrameTask = frame;
+                    break;
             }
 
             return new DelayFrame(frame, duration, duration + metadata.Delay);
@@ -338,7 +335,7 @@ namespace WpfAnimatedGif
             var metadata = (BitmapMetadata)frame.Metadata;
             var metadataDelay = metadata.GetQueryOrDefault("/grctlext/Delay", 0);
             var delay = TimeSpan.FromMilliseconds(metadataDelay <= 1 ? 100 : metadataDelay * 10);
-            var disposalMethod = (FrameDisposalMethod)(metadata.GetQueryOrDefault("/grctlext/Disposal", 0) % 0x03);
+            var disposalMethod = (FrameDisposalMethod)metadata.GetQueryOrDefault("/grctlext/Disposal", 0);
             var frameMetadata = new FrameMetadata
             {
                 Left = metadata.GetQueryOrDefault("/imgdesc/Left", 0),
