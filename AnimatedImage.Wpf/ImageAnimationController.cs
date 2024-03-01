@@ -177,7 +177,8 @@ namespace AnimatedImage.Wpf
                 _image.BeginAnimation(Image.SourceProperty, null);
                 _clock.Completed -= AnimationCompleted;
                 _animation.CurrentIndexUpdated -= OnCurrentFrameChanged;
-                _image.Source = null;
+                // Keep image after dispose 
+                //_image.Source = null;
             }
         }
     }
