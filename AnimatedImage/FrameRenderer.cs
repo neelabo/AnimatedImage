@@ -104,28 +104,37 @@ namespace AnimatedImage
 #endif
             out FrameRenderer renderer)
         {
-            stream.Position = 0;
-            var magic = new byte[Signature.MaxLength];
-            stream.Read(magic, 0, magic.Length);
-
-            stream.Position = 0;
-            if (Signature.IsGifSignature(magic))
+            try
             {
-                var gif = new GifFile(stream);
-                renderer = new GifRenderer(gif, factory);
-                return true;
-            }
+                stream.Position = 0;
+                var magic = new byte[Signature.MaxLength];
+                stream.Read(magic, 0, magic.Length);
 
-            if (Signature.IsPngSignature(magic))
+                stream.Position = 0;
+                if (Signature.IsGifSignature(magic))
+                {
+                    var gif = new GifFile(stream);
+                    renderer = new GifRenderer(gif, factory);
+                    return true;
+                }
+
+                if (Signature.IsPngSignature(magic))
+                {
+                    var png = new ApngFile(stream);
+
+                    renderer = new PngRenderer(png, factory);
+                    return true;
+                }
+
+                renderer = null!;
+                return false;
+            }
+            // If the stream is disposed, set it to fail.
+            catch (ObjectDisposedException)
             {
-                var png = new ApngFile(stream);
-
-                renderer = new PngRenderer(png, factory);
-                return true;
+                renderer = null!;
+                return false;
             }
-
-            renderer = null!;
-            return false;
         }
 
         private static class Signature
