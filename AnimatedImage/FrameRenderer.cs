@@ -129,8 +129,8 @@ namespace AnimatedImage
                 renderer = null!;
                 return false;
             }
-            // If the stream is disposed, set it to fail.
-            catch (ObjectDisposedException)
+            // Mark all exceptions as failures.
+            catch (Exception) 
             {
                 renderer = null!;
                 return false;
