@@ -108,7 +108,7 @@ namespace AnimatedImage
             {
                 stream.Position = 0;
                 var magic = new byte[Signature.MaxLength];
-                stream.Read(magic, 0, magic.Length);
+                _ = stream.Read(magic, 0, magic.Length);
 
                 stream.Position = 0;
                 if (Signature.IsGifSignature(magic))
