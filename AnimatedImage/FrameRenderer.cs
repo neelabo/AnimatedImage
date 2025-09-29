@@ -79,6 +79,13 @@ namespace AnimatedImage
         /// </exception>
         public abstract void ProcessFrame(int frameIndex);
 
+        /// <summary>
+        /// Draws the frame indicated by index. (Asynchronous version)
+        /// </summary>
+        /// <param name="frameIndex">The target frame index.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// frameindex is less than 0, or larger than or equals to the count of frames.
+        /// </exception>
         public abstract Task ProcessFrameAsync(int frameIndex);
 
         /// <summary>
@@ -113,7 +120,7 @@ namespace AnimatedImage
             {
                 stream.Position = 0;
                 var magic = new byte[Signature.MaxLength];
-                _ = stream.Read(magic, 0, magic.Length);
+                stream.ReadExactly(magic);
 
                 stream.Position = 0;
                 if (Signature.IsGifSignature(magic))
@@ -209,6 +216,9 @@ namespace AnimatedImage
             }
         }
 
+        /// <summary>
+        /// Releases the resources used by the current instance of the class.
+        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)

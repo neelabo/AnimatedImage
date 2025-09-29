@@ -62,7 +62,7 @@ namespace AnimatedImage.Formats
             if (backup is not null)
                 Array.Copy(work, backup, Width * Height * 4);
 
-            await dcTsk.ContinueWith((tsk, s) => RenderBlock((byte[])s), work);
+            await dcTsk.ContinueWith((tsk, s) => RenderBlock(s as byte[]), work);
 
             bitmap.WriteBGRA(work, X, Y, Width, Height);
         }
@@ -79,8 +79,10 @@ namespace AnimatedImage.Formats
             }
         }
 
-        private void RenderBlock(byte[] work)
+        private void RenderBlock(byte[]? work)
         {
+            if (work is null) throw new ArgumentNullException(nameof(work));
+
             if (_interlace)
             {
                 int i = 0;

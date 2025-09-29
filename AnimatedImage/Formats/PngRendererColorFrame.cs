@@ -55,13 +55,15 @@ namespace AnimatedImage.Formats
                 Array.Copy(work, backup, Width * Height * 4);
             }
 
-            await Task.Factory.StartNew(w => RenderBlock((byte[])w), work);
+            await Task.Factory.StartNew(w => RenderBlock(w as byte[]), work);
 
             bitmap.WriteBGRA(work, X, Y, Width, Height);
         }
 
-        private void RenderBlock(byte[] work)
+        private void RenderBlock(byte[]? work)
         {
+            if (work is null) throw new ArgumentNullException(nameof(work));
+
             int workIdx = 0;
             for (var i = 0; i < Height; ++i)
             {
