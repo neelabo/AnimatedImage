@@ -161,28 +161,32 @@ namespace AnimatedImage.Formats.WebP
         {
             var asm = Assembly.GetCallingAssembly();
             var asmDir = Path.GetDirectoryName(asm.Location)!;
+            var dllDir = Config.NativeLibraryPath;
 
+            if (dllDir is null)
+            {
 #if NET472_OR_GREATER
-            var arch = RuntimeInformation.ProcessArchitecture;
-            var dllDir = arch switch
-            {
-                Architecture.X86 => Path.Combine(asmDir, "runtimes/win-x86/native/"),
-                Architecture.X64 => Path.Combine(asmDir, "runtimes/win-x64/native/"),
-                Architecture.Arm64 => Path.Combine(asmDir, "runtimes/win-arm64/native/"),
-                _ => string.Empty
-            };
+                var arch = RuntimeInformation.ProcessArchitecture;
+                dllDir = arch switch
+                {
+                    Architecture.X86 => Path.Combine(asmDir, "runtimes/win-x86/native/"),
+                    Architecture.X64 => Path.Combine(asmDir, "runtimes/win-x64/native/"),
+                    Architecture.Arm64 => Path.Combine(asmDir, "runtimes/win-arm64/native/"),
+                    _ => null
+                };
 
-            if (dllDir == string.Empty)
-            {
-                Debug.Print("AnimatedImage.Formats.WebP: [windows] unsupport architecture " + arch);
-                return false;
-            }
+                if (dllDir is null)
+                {
+                    Debug.Print("AnimatedImage.Formats.WebP: [windows] unsupport architecture " + arch);
+                    return false;
+                }
 #else
-            var dllDir =
-                    Environment.Is64BitProcess ?
-                        Path.Combine(asmDir, "runtimes/win-x64/native") :
-                        Path.Combine(asmDir, "runtimes/win-x86/native");
+                dllDir =
+                        Environment.Is64BitProcess ?
+                            Path.Combine(asmDir, "runtimes/win-x64/native") :
+                            Path.Combine(asmDir, "runtimes/win-x86/native");
 #endif
+            }
 
             var nativeDlls = new[] { "libsharpyuv.dll", "libwebp.dll", "libwebpdemux.dll" };
             foreach (var nativeDll in nativeDlls)
@@ -216,34 +220,39 @@ namespace AnimatedImage.Formats.WebP
 #elif NETCOREAPP
         private static bool PrivateCheckSupport()
         {
-            var asm = Assembly.GetCallingAssembly();
-            var asmDir = Path.GetDirectoryName(asm.Location)!;
+            var dllDir = Config.NativeLibraryPath;
+            
+            if (dllDir is null)
+            {
+                var asm = Assembly.GetCallingAssembly();
+                var asmDir = Path.GetDirectoryName(asm.Location)!;
 
-            var arch = RuntimeInformation.ProcessArchitecture;
-            var dllDir =
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-                        arch switch
-                        {
-                            Architecture.X86 => Path.Combine(asmDir, "runtimes/win-x86/native/"),
-                            Architecture.X64 => Path.Combine(asmDir, "runtimes/win-x64/native/"),
-                            Architecture.Arm64 => Path.Combine(asmDir, "runtimes/win-arm64/native/"),
-                            _ => Failed("AnimatedImage.Formats.WebP: [windows] unsupport architecture " + arch)
-                        } :
-                    RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ?
-                        arch switch
-                        {
-                            Architecture.X64 => Path.Combine(asmDir, "runtimes/linux-x64/native/"),
-                            Architecture.Arm64 => Path.Combine(asmDir, "runtimes/linux-arm64/native/"),
-                            _ => Failed("AnimatedImage.Formats.WebP: [linux] unsupport architecture " + arch)
-                        } :
-                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ?
-                        arch switch
-                        {
-                            Architecture.X64 => Path.Combine(asmDir, "runtimes/osx-x64/native/"),
-                            Architecture.Arm64 => Path.Combine(asmDir, "runtimes/osx-arm64/native/"),
-                            _ => Failed("AnimatedImage.Formats.WebP: [osx] unsupport architecture " + arch)
-                        } :
-                        Failed("AnimatedImage.Formats.WebP: unsupport platform " + RuntimeInformation.OSDescription);
+                var arch = RuntimeInformation.ProcessArchitecture;
+                dllDir =
+                        RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
+                            arch switch
+                            {
+                                Architecture.X86 => Path.Combine(asmDir, "runtimes/win-x86/native/"),
+                                Architecture.X64 => Path.Combine(asmDir, "runtimes/win-x64/native/"),
+                                Architecture.Arm64 => Path.Combine(asmDir, "runtimes/win-arm64/native/"),
+                                _ => Failed("AnimatedImage.Formats.WebP: [windows] unsupport architecture " + arch)
+                            } :
+                        RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ?
+                            arch switch
+                            {
+                                Architecture.X64 => Path.Combine(asmDir, "runtimes/linux-x64/native/"),
+                                Architecture.Arm64 => Path.Combine(asmDir, "runtimes/linux-arm64/native/"),
+                                _ => Failed("AnimatedImage.Formats.WebP: [linux] unsupport architecture " + arch)
+                            } :
+                        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ?
+                            arch switch
+                            {
+                                Architecture.X64 => Path.Combine(asmDir, "runtimes/osx-x64/native/"),
+                                Architecture.Arm64 => Path.Combine(asmDir, "runtimes/osx-arm64/native/"),
+                                _ => Failed("AnimatedImage.Formats.WebP: [osx] unsupport architecture " + arch)
+                            } :
+                            Failed("AnimatedImage.Formats.WebP: unsupport platform " + RuntimeInformation.OSDescription);
+            }
 
             if (dllDir is null)
             {
